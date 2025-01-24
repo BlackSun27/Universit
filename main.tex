@@ -1,0 +1,41 @@
+\documentclass{report}
+\usepackage{color}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[italian]{babel}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+\usepackage{ulem}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{float} 
+\usepackage{tabularx}
+
+\lstset{language=Java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{green},
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  basicstyle=\ttfamily,
+  morecomment=[s][\color{gray}]{@}{\ }
+  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+}
+
+\title{EserciziLP1}
+
+\begin{document}
+\maketitle
+
+\clearpage
+
+\tableofcontents
+\include{chapters/ml}
+\include{chapters/prolog}
+\include{chapters/binding_java}
+\end{document}

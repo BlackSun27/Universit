@@ -1,0 +1,467 @@
+\chapter{Esercizi ML}
+
+\section{Manipolazione di interi}
+
+\subsection{Fattoriale}
+
+Si scriva il fattoriale di un numero (definito come n!=n*(n-1)! e 0! = 1! = 1).
+
+\begin{lstlisting}
+    fun fatt(n) = if n=0 then 1 else n*fatt(n-1);
+\end{lstlisting}
+
+\subsection{Sequenza di Fibonacci}
+
+La sequenza di Fibonacci è la somma di numeri definita come: 
+\newline
+Fib(n) = Fib(n-1) + Fib(n-2)
+\newline
+Dove Fib(0) = Fib(1) = 1.
+
+\begin{lstlisting}
+    fun fib_sum(n) = if n=0 then 1 
+    else if n=1 then 1 
+    else fib_sum(n-1)+fib_sum(n-2);
+\end{lstlisting}
+
+\section{Manipolazione liste}
+Le liste sono state definite nel modo seguente:
+
+\begin{lstlisting}
+    datatype List = Empty | nodo of int * List;
+\end{lstlisting}
+
+\subsection{Conta}
+
+Si conti la lunghezza di una lista.
+
+\begin{lstlisting}
+    fun conta (Empty) = 0
+= | conta (nodo(x,l)) = conta(l) + 1;
+\end{lstlisting}
+
+\subsection{insert}
+
+Funzione per inserire elementi in una lista.
+
+\begin{lstlisting}
+    fun insert(x,Empty) = nodo(x,Empty)
+    | insert(x: int, l: List) = nodo(x,l);
+\end{lstlisting}
+
+\subsection{insertAt}
+
+Funzione per inserire un elemento nella lista in un punto specifico della lista (la testa della lista parte sempre da 0).
+
+\begin{lstlisting}
+    fun insertAt(x: int, 0, l: List) = nodo(x, l)
+  | insertAt(x: int, n, Empty) = Empty
+  | insertAt(x: int, n, nodo(h, t)) = nodo(h, insertAt(x, n-1, t));
+
+\end{lstlisting}
+
+\subsection{max_value}
+
+Funzione che calcoli l'elemento più grande presente in una lista.
+
+\begin{lstlisting}
+    fun max_value(Empty) = 0
+=   | max_value(nodo(x, Empty)) = x
+=   | max_value(nodo(x, xs)) =
+=       let
+=         val max_tail = max_value(xs)
+=       in
+=         if x > max_tail then x else max_tail
+=       end;
+\end{lstlisting}
+
+\subsection{min-value}
+
+Funzioni che calcoli l'elemento più piccola in una lista.
+
+\begin{lstlisting}
+    fun min_value(Empty) = 0
+    | min_value(nodo(x, Empty)) = x
+    | min_value(nodo(x,xs)) = 
+	let
+	   val min_tail = min_value(xs)
+	in
+	   if x < min_tail then x else min_tail
+	end;
+\end{lstlisting}
+
+\subsection{sum-list}
+
+Somma tutti gli elementi di una lista.
+
+\begin{lstlisting}
+    fun sum_list(Empty) = 0
+    = | sum_list(nodo(x,l)) = x + sum_list(l);
+\end{lstlisting}
+
+\subsection{count-occurrencies}
+
+Conta quante volte si ripete un elemento in una lista.
+
+\begin{lstlisting}
+    fun count_occurrences(_, Empty) = 0
+    | count_occurrences(x, nodo(h, t)) =
+      if x = h then 1 + count_occurrences(x, t)
+      else count_occurrences(x, t);
+\end{lstlisting}
+
+\subsection{contains}
+
+Verifica se un elemento è contenuto nella lista.
+
+\begin{lstlisting}
+    fun contains(_,Empty) = false
+    = | contains(x, nodo(h,t)) =
+    = if x=h then true else contains(x,t);
+\end{lstlisting}
+
+\subsection{remove-element}
+
+Elimina un elemento da una lista.
+
+\begin{lstlisting}
+    fun remove_element(_, Empty) = Empty
+    = | remove_element(x, nodo(h,t)) =
+    = if x=h then remove_element(x,t) 
+        else nodo(h, remove_element(x,t));
+\end{lstlisting}
+
+\subsection{reverse}
+
+Invertire gli elementi di una lista.
+
+\begin{lstlisting}
+    fun reverse l =
+    = let
+    = fun rev(Empty,acc) = acc
+    = |rev(nodo(x,xs),acc) = rev(xs, nodo(x,acc))
+    = in
+    = rev(l,Empty)
+    = end;
+\end{lstlisting}
+
+\subsection{concat}
+
+Concatenare due liste in una.
+
+\begin{lstlisting}
+    fun concat(Empty, l2) = l2 
+    = |concat(nodo(h,t), l2) = nodo(h, concat(t,l2));
+\end{lstlisting}
+
+\subsection{nth-element}
+
+Trova l'ennesimo elemento di una lista partendo da 0.
+
+\begin{lstlisting}
+    fun nth_element(_,Empty) = 0
+    = |nth_element(0, nodo(x,_)) = x
+    = |nth_element(n, nodo(h,t)) = nth_element(n-1,t);
+\end{lstlisting}
+
+\subsection{split-list}
+
+Divide una lista in 2 (di lunghezza l), data una lunghezza (n) di partenza in modo che la lista risultante 1 abbia gli elementi che vanno da 0 a n-1 e la seconda lista abbia gli elementi che vanno da n a l.
+
+\begin{lstlisting}
+    fun split_list(0,l) = (Empty,l) //1
+    = |split_list(_,Empty) = (Empty,Empty) //2
+    = |split_list(n, nodo(x,xs))= 
+    = let
+    = val (l1,l2) = split_list(n-1,xs) //3
+    = in
+    = (nodo(x,l1),l2) //4
+    = end;
+\end{lstlisting}
+
+\subsubsection{Spiegazione}
+
+Come funziona split\_list?
+
+//1 -> La posizione per dividere in 2 la lista di partenza è nulla, quindi il risultato darà una lista vuota (Empty) e un'altra lista, che è quella di partenza.
+
+
+//2 -> Posizione qualunque, ma lista di partenza vuota, il risultato della funzione è 2 liste vuote.
+
+
+//3 -> dichiaro 2 liste e man mano che n-1 diminuisce (arrivando a 0), viene riempita l1 con gli elementi di nodo(x,xs) che trova, appena n=0 si torna al caso //1.
+
+
+//4 -> per far partire il tutto (e popolare l1, che diventerà la nuova testa della lista di partenza).
+
+
+\subsection{equal-list}
+
+Verifica se due liste sono uguali.
+
+\begin{lstlisting}
+    fun equal_list(Empty,Empty) = true
+    = |equal_list(_,Empty) = false
+    = |equal_list(Empty,_) = false
+    = |equal_list(nodo(x,l1),nodo(y,l2)) =
+    = if x=y then equal_list(l1,l2) else false;
+\end{lstlisting}    
+
+\subsection{insert-sorted}
+
+Permette di inserire un elemento in una lista effettuandolo in modo crescente.
+
+\begin{lstlisting}
+    fun insert_sorted(x,Empty) = nodo(x,Empty)
+    = |insert_sorted(x,nodo(h,t)) =
+    = if x<=h then nodo(x,nodo(h,t)) 
+      else nodo(h,insert_sorted(x,t));
+\end{lstlisting}
+
+\subsection{is-sorted}
+
+Verifica che la lista abbia gli elementi inseriti in modo crescente.
+
+\begin{lstlisting}
+    fun is_sorted(nodo(_,Empty)) = true
+    = |is_sorted(nodo(x,nodo(h,t))) = 
+    if x<=h then is_sorted(nodo(h,t)) else false;
+\end{lstlisting}
+
+\subsection{count-between}
+
+Dati due estremi (a,b) si contano gli elementi compresi tra di loro.
+
+\begin{lstlisting}
+    fun count_between(_,_,Empty) = Empty
+    = |count_between(a,b,nodo(x,l1)) = 
+    if x>=a andalso x<=b then 
+    nodo(x,count_between(a,b,l1)) 
+    else count_between(a,b,l1);
+\end{lstlisting}
+
+\section{Alberi}
+
+Gli alberi sono stati definiti nel modo seguente:
+\begin{lstlisting}
+    datatype 'a tree = Empty|node of 'a tree * int * 'a tree;
+\end{lstlisting}
+
+\subsection{count-nodes}
+
+Conta il numero di nodi presenti nell'albero.
+
+\begin{lstlisting}
+    fun count_nodes Empty = 0
+    = |count_nodes(node(lft,_,rht)) =
+    = 1 + count_nodes lft + count_nodes rht;
+\end{lstlisting}
+
+\subsection{height}
+
+Misura l'altezza dell'albero.
+
+\begin{lstlisting}
+    fun height Empty = 0
+    = |height(node(lft,_,rht)) =
+    1+max(height(lft),height(rht));
+\end{lstlisting}
+
+\subsection{find-element}
+
+Verifica se un elemento è presente nell'albero.
+
+\begin{lstlisting}
+    fun find_element(_,Empty) = false
+    = |find_element(x, node(lft,y,rht)) =
+    = if x=y then true 
+    else find_element(x,lft) orelse find_element(x,rht);
+
+\end{lstlisting}
+
+\subsection{sum-tree}
+
+Fa la somma di tutti i valori presenti nell'albero.
+
+\begin{lstlisting}
+    fun sum_tree(Empty) = 0
+    = |sum_tree(node(lft,x,rht)) =
+    x + sum_tree(lft) + sum_tree(rht);
+\end{lstlisting}
+
+\subsection{mirror}
+
+Fa lo speculare dell'albero dato in input.
+
+\begin{lstlisting}
+    fun mirror Empty = Empty
+    = |mirror(node(left,x,right)) =
+    node(mirror(right),x,mirror(left));
+\end{lstlisting}
+
+\subsection{preorder}
+
+Si effettui la visita in preorder di un albero.
+
+\begin{lstlisting}
+    fun preorder(Empty) = []
+    = |preorder(node(left,x,right)) =
+    [x] @ preorder(left) @ preorder(right);
+\end{lstlisting}
+
+\subsection{insert-bst}
+
+Si effettui l'inserimento in un albero di ricerca binario.
+
+\begin{lstlisting}
+    fun insert_bst(x, Empty) = node(Empty,x,Empty)
+    = |insert_bst(x,node(left,y,right)) =
+    = if x<y then node(insert_bst(x,left),y,right)
+    else node(left,y,insert_bst(x,right));
+\end{lstlisting}
+
+\subsection{count-only-child}
+
+Si scriva una funzione che calcoli quante foglie hanno solo un nodo figlio.
+
+\begin{lstlisting}
+    fun count_only_child(node(Empty,_,Empty)) = 0
+    = |count_only_child(node(left,x,Empty)) = 
+    x + count_only_child(left)
+    = |count_only_child(node(Empty,x,right)) = 
+    x + count_only_child(right)
+    = |count_only_child(node(left,x,right)) = 
+    count_only_child(left) + count_only_child(right);
+\end{lstlisting}
+
+\subsection{build-max}
+
+Si scriva una funzione che calcoli il valore massimo tra i sottoalberi e costruisca un albero di soli valori massimi.
+
+\begin{lstlisting}
+    fun build_max(Empty) = Empty
+    |build_max(node(left,x,right))=
+    let
+    val max_left = build_max(left)
+    val max_right = build_max(right)
+    val max_val = max(max_left,max_right)
+    in
+    node(max_left,max_val,max_right)
+    end;
+\end{lstlisting}
+
+\subsection{maxLeaf}
+
+Dato il tipo di albero (per i prossimi esercizi sarà lo stesso):
+\begin{lstlisting}
+    datatype albero = vuoto|nodo of int*albero*albero;
+\end{lstlisting}
+Si scriva una funzione che dato un albero calcoli il valore massimo presente.
+
+\begin{lstlisting}
+    fun maxLeaf(vuoto) = 0
+    = |maxLeaf(nodo(x,vuoto,vuoto)) = x
+    = |maxLeaf(nodo(x,left,right))=
+    = let
+    = val max_left = maxLeaf(left)
+    = val max_right = maxLeaf(right)
+    = in
+    = if max_left>max_right then max_left 
+    else max_right
+    = end;
+\end{lstlisting}
+
+\subsection{treeMap}
+
+Si scriva una funzione che sia map (funzione di ordine superiore per le liste), ma per gli alberi binari.
+
+\begin{lstlisting}
+    fun treeMap(f, vuoto) = vuoto
+    = |treeMap(f, nodo(x,left,right))=
+    = let
+    = val treeMapLeft = treeMap(f,left)
+    = val treeMapRight = treeMap(f, right)
+    = in
+    = nodo(f(x),treeMapLeft,treeMapRight)
+    = end;
+\end{lstlisting}
+
+\subsection{sameStructure}
+
+Si scriva una funzione che dati due alberi verifichi che entrambi hanno la stessa struttura.
+
+\begin{lstlisting}
+    fun sameStructure(vuoto, vuoto) = true
+      | sameStructure(_, vuoto) = false
+      | sameStructure(vuoto, _) = false
+      | sameStructure(nodo(_, left1, right1), nodo(_, left2, right2)) =
+          let
+            val structLeft = sameStructure(left1, left2)
+            val structRight = sameStructure(right1, right2)
+          in
+            structLeft andalso structRight
+          end;
+
+\end{lstlisting}
+
+\subsection{biggest}
+
+Si scriva una funzione che dati due alberi verifichi quale dei due ha la somma di valori maggiore.
+
+\begin{lstlisting}
+    fun biggest(vuoto,vuoto) = vuoto
+    = |biggest(a1,vuoto) = a1
+    = |biggest(vuoto,a2) = a2
+    = |biggest(nodo(x,left1,right1),nodo(y,left2,right2)) =
+    = let
+    = fun sumTree(vuoto) = 0
+    = |sumTree(nodo(x,left,right)) = x + sumTree(left) + sumTree(right)
+    = val sumA1 = x + sumTree(left1) + sumTree(right1)
+    = val sumA2 = y + sumTree(left2) + sumTree(right2)
+    = in
+    = if sumA1>sumA2 then nodo(x,left1,right1) else nodo(y,left2,right2)
+    = end;
+\end{lstlisting}
+
+\subsection{plus}
+
+Si scriva una funzione che aggiunga un certo intero n a un albero.
+
+\begin{lstlisting}
+    fun plus(vuoto,_) = vuoto
+    = |plus(nodo(x,left,right),n) =
+    = let
+    = val plusLeft = plus(left,n)
+    = val plusRight = plus(right,n)
+    = in
+    = nodo(x+n,plusLeft,plusRight)
+    = end;
+\end{lstlisting}
+
+\subsection{remove-leaves}
+
+Si scriva una funzione che rimuova tutte le foglie da un albero.
+
+\begin{lstlisting}
+    fun remove_leaves(vuoto) = vuoto
+    = |remove_leaves(nodo(_,vuoto,vuoto)) = vuoto
+    = |remove_leaves(nodo(x,left,right)) = 
+    nodo(x,remove_leaves(left),remove_leaves(right));
+\end{lstlisting}
+
+\subsection{treeCount}
+
+Si scriva una funzione che prenda in ingresso un albero e una funzione da interi a booleani e restituisca il numero di nodi per cui la condizione della funzione a interi è vera.
+
+\begin{lstlisting}
+fun treeCount(vuoto,_) = 0
+= |treeCount(nodo(x,left,right),f) =
+= let
+= val treeLeft = treeCount(left, f)
+= val treeRight = treeCount(right, f)
+= val sum = treeLeft + treeRight
+= in
+= if f(x) = true then sum + 1 else sum
+= end;
+val treeCount = fn : albero * (int -> bool) -> int
+\end{lstlisting}

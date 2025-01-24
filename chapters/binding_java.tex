@@ -1,0 +1,194 @@
+\chapter{Early e late binding}
+
+Sezione di esercizi svolti di early e late binding in Java.
+
+\section{Esercizio 2 powerpoint binding}
+
+    \begin{lstlisting}[language=java]
+        class A (
+            public String f(double n, Object x) { return "A1"; }
+            public String f(double n, A x){ return "A2"; }
+            public String f(int n, Object x) { return "A3"; }
+        )
+        class B extends A (
+            public String f(double n, Object x) { return "B1"; }
+            public String f(float n, Object y) { return "B2"; }
+        )
+        class C extends B (
+            public final String f(double n, A x) { return "C1"; }
+        )
+
+        public class Test (
+            public static void main(String[] args) (
+                C gamma = new C();
+                B beta = new B();
+                A alfa = gamma;
+                System.out.println(alfa.f(3.0, gamma));
+                System.out.println(beta.f(3, beta));
+                System.out.println(beta.f(3.0, null));
+                System.out.println(gamma.f(3.0, gamma));
+            )
+        )
+    \end{lstlisting}
+    Innanzitutto si fa una distinzione di casi:
+    \begin{enumerate}
+        \item a cosa possono essere dichiarate le classi;
+        \item i metodi a cui possono accedere le variabile;
+        \item differenze che in binding statico e dinamico.
+    \end{enumerate}
+
+    \begin{enumerate}
+        \item Inizio dal primo caso, A può essere dichiarata in tutti e \3 i tipi: A,B e C, B può essere
+        dichiarata nei tipi: B e C e, infine, C può essere dichiarata solo col tipo C.
+        \item Le variabili dichiarate tramite la classe A possono accedere solo ai metodi di A e di Object, 
+        le variabili dichiarate tramite la classe B possono accedere ai metodi A, B e Object, le variabili
+        dichiarate tramite la classe C possono accedere ai metodi di A, B, C e Object.
+        \item gamma è dichiarato staticamente di tipo C, è anche dinamicamente di tipo C (new C()), lo stesso
+        ragionamento si applica a beta, staticamente è di tipo B, dinamicamente è di tipo B (new B()), 
+        per alfa il discorso è diverso, è staticamente dichiarato di tipo A, ma dinamicamente è dichiarato
+        di tipo C (alfa = (C)gamma - non è un casting, è per dire che gamma è di tipo C).
+    \end{enumerate}
+
+    Ricerca firme candidate:
+    \begin{itemize}
+        \item alfa.f(\3.\0,gamma) richiama il metodo f(double,C) (si ricordi che il tipo C può essere 
+        convertito al tipo A,B e Object), le firme candidate devo ricercarle nella classe A, in quanto alfa
+        è dichiarato staticamente come A.
+        Ho dei metodi che mi sono visibili e non visibili durante il binding:
+        \begin{itemize}
+            \item il metodo f(double,Object) è visibile e compatibile.
+            \item il metodo f(double, A) è visibile e compatibile.
+            \item il metodo f(int, Object), non è visibile in quanto non è compatibile (per renderlo
+            compatibile si deve fare il cast da double a int).
+        \end{itemize} 
+        La seconda firma è più specifica della prima, l'early binding si conclude scegliendo f(double,A).
+        Siccome alfa è di tipo dinamico C, in C c'è solo un metodo e ha anche la stessa firma, pertanto
+        il compilatore sceglierà C.f(double,A), stampando C1.
+        \item beta.f(\3,beta), il metodo è del tipo: f(int, B), le firme candidate devo ricercarle in A e B.
+        Ho dei metodi visibili e non durante il binding:
+        \begin{itemize}
+            \item B.f(double,Object) è visibile e compatibile.
+            \item B.f(float,Object) è visibile e compatibile.
+            \item A.f(double,Object) è visibile e compatibile.
+            \item A.f(double,A) è visibile e compatibile.
+            \item A.f(int,Object) è visibile e compatibile.
+        \end{itemize}
+        Tutti i metodi sono specifici tra di loro, ma nessuno di loro è il più specifico, pertanto il 
+        compilatore darà errore di compilazione.
+        \item beta.f(\3.\0,null), metodo di tipo f(double,null) (dove null può essere una classe da 
+        istanziare).
+        \begin{itemize}
+            \item B.f(double,Object), è visibile e compatibile.
+            \item B.f(float,Object) è visibile e compatibile.
+            \item A.f(double,Object) è visibile e compatibile.
+            \item A.f(double,A) è visibile e compatibile.
+            \item A.f(int,Object) non è visibile e non è compatibile, per via di int.
+        \end{itemize}
+        Tutti i metodi sono specifici tra di loro, ma A.f(double,A) prevale perché è una classe più
+        specifica di Object, pertanto in early binding viene scelto A.f(double,A). In late binding
+        sceglie comunque A.f(double,A), in quanto beta è una variabile di un sottotipo di A, dunque 
+        può accedere al metodo di A.
+        \item gamma.f(3.0,gamma), metodo di tipo f(double,C). Per le firme candidate devo fare il confronto
+        tra i metodi in C,B,A e Object.
+        \begin{itemize}
+            \item B.f(double,Object), è visibile e compatibile.
+            \item B.f(float,Object) è visibile e compatibile.
+            \item A.f(double,Object) è visibile e compatibile.
+            \item A.f(double,A) è visibile e compatibile.
+            \item A.f(int,Object) non è visibile e non è compatibile, per via di int.
+            \item C.f(double, A) è visibile e compatible.
+        \end{itemize}
+        I metodi più specifici sono A.f(double,A) e C.f(double,A), il tipo statico dichiarato di gamma è C,
+        in early binding viene scelto C.f(double,A). Il tipo dinamico di gamma è comunque C, pertanto in
+        late binding viene stampato C1.
+    \end{itemize}
+    Risultati compilatore (ovviamente la riga con beta.f(3,beta) è stata commentata):
+    \begin{lstlisting}
+        C1
+        A2
+        C1
+    \end{lstlisting}
+    \section{Esercizio 3 powerpoint binding}
+        \begin{lstlisting}[language=java]
+            class A {
+                public String f(A x, A[] y, B z) { return "A1"; }
+                public String f(A x, Object y, B z) { return "A2"; }
+            }
+            class B extends A {
+                public String f(B x, A[] y, B z) { return "B1:" + x.f((A)x, y, z); }
+                public String f(A x, B[] y, B z) { return "B2"; }
+            }
+            class C extends B {
+                public String f(A x, A[] y, C z) { return "C1:" + z.f(new C(), y, z); }
+            }
+
+            public class Main {
+                public static void main(String[] args) {
+                    C gamma = new C();
+                    B beta = gamma;
+                    A[] array = new A[10];
+                    System.out.println(beta.f(gamma, array, gamma));
+                    System.out.println(gamma.f(array[0], null, beta));
+                    System.out.println(beta == gamma);
+                }    
+            }
+
+        \end{lstlisting}
+        Analizzo prima di tutto il tipo in cui sono state istanziate le variabili, distinguendo il loro 
+        tipo statico e dinamico, verificando i metodi a cui possono accedere e anche in che tipo le 
+        variabili possono essere istanziate.
+        \begin{enumerate}
+            \item gamma è stata istanziata staticamente di tipo C e anche dinamicamente è di tipo C,
+            beta è stata istanziata staticamente di tipo B, ma dinamicamente punta a gamma, quindi 
+            è dinamicamente di tipo C, array è dichiarato di tipo A[] in entrambi i casi.
+            \item le variabili di tipo A possono accedere solo ai metodi di A e Object, le variabili
+            di tipo B possono accedere ai metodi di A,B e Object, le variabili di tipo C possono accedere 
+            ai metodi di A,B,C e Object.
+            \item le variabili di tipo A possono essere definite tramite il tipo A,B e C, le variabili
+            di tipo B possono essere definite tramite il tipo B e C, le variabili di tipo C possono 
+            essere definite tramite il tipo C.
+        \end{enumerate}
+        Fatte queste distinzioni si può procedere a verificare le firme candidate, partendo dall'ultima 
+        stampa:
+        \begin{itemize}
+            \item System.out.println(beta == gamma); questo confronto darà vero, in quanto beta e gamma
+            coincidono per definizione e per tipo.
+            \item  System.out.println(beta.f(gamma, array, gamma)), il metodo chiamato sta accettando 
+            variabili di tipo (C,A[],C), beta è staticamente definita da B, quindi in early binding 
+            valuto solo i metodi delle classi A e B:
+            \begin{itemize}
+                \item public String f(A x, A[] y, B z) { return "A1"; }, è visibile e compatibile.
+                \item public String f(A x, Object y, B z) { return "A2"; }, è visibile e compatibile.
+                \item public String f(B x, A[] y, B z) { return "B1:" + x.f((A)x, y, z); }, è visibile
+                e compatibile.
+                \item public String f(A x, B[] y, B z) { return "B2"; }, non è visibile perché serve un 
+                cast esplicito di A[] a B[].
+            \end{itemize}
+            Il metodo 2 è meno esplicito perché c'è il passaggio di un array di 10 elementi a un unico Object,
+            il metodo 1 e 3 sono i più espliciti, ma il numero 3 è la firma che verrà scelta (in early binding).
+            In late binding, siccome beta è di tipo dinamico C, devo considerare anche il metodo in C:
+            \begin{itemize}
+                \item public String f(A x, A[] y, C z) { return "C1:" + z.f(new C(), y, z); }
+            \end{itemize}
+            Il metodo in C è il più esplicito, ma la chiamata z.f(C,A[],C) è ambigua, in quanto z 
+            (variabile di tipo C), può accedere al metodo (B,A[],B) in B e al metodo (A,A[],C) in C,
+            pertanto c'è un errore di compilazione.
+            \item System.out.println(gamma.f(array[0], null, beta));, la funzione ha accetta variabili
+            del tipo (A,null, B), gamma è di tipo dichiarato C, dunque posso vedere tutti i metodi, 
+            da A a C:
+            \begin{enumerate}
+                \item public String f(A x, A[] y, B z) { return "A1"; }, è visibile e compatibile.
+                \item public String f(A x, Object y, B z) { return "A2"; }, è visibile e compatibile.
+                \item public String f(B x, A[] y, B z) { return "B1:" + x.f((A)x, y, z); }, non è visibile
+                e compatibile, in quanto B richiede un cast esplicito dal tipo A.
+                \item public String f(A x, B[] y, B z) { return "B2"; }, è visibile e compatibile.
+                \item public String f(A x, A[] y, C z) { return "C1:" + z.f(new C(), y, z); } non è visibile,
+                in quanto C richiede un cast esplicito dal tipo B.
+            \end{enumerate}
+            Il metodo meno esplicito è A2. null è un valore accettabile per le classi di tipo A[] e B[],
+            dunque il compilatore deve scegliere tra il metodo A.f(A,A[],B) e B.f(A,B[],B), siccome la
+            classe C estende direttamente la classe B e indirettamente la classe A (perché B estende A),
+            il metodo più esplicito lo trovo in B e converto null di tipo B[], invece di tipo A[], perché
+            è più specifico di A[].
+            Siccome gamma è di tipo C staticamente e dinamicamente, il late binding stampa in B2.
+        \end{itemize}

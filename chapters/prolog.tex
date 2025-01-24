@@ -1,0 +1,350 @@
+\chapter{Prolog}
+
+\subsection{sublist}
+
+Si scriva un predicato che date due liste (L1 e L2) verifichi se L2 è sottolista di L1.
+
+Esempio:
+
+\begin{lstlisting}
+    ?- sublist([a,b,c],[a,b,z,x,y,a,b,c,d]).
+    true
+\end{lstlisting}
+
+\begin{lstlisting}
+    sublist([],_). %caso base: lista vuota contenuta in L2
+    sublist([H|L1],[H|L2]) :- 
+    %caso 1: testa uguale tra le liste
+    sublist(L1,L2).
+    sublist([H1|L1],[H2|L2]) :- 
+    %caso 2: le teste non coincidono, 
+    %ma si fa proseguire tutta la lista finche' 
+    %non viene fatta la prima chiamata 
+    %alla sublist di sopra.
+        H1 \= H2,
+        atom(H2),
+        sublist([H1|L1],L2).
+\end{lstlisting}
+
+\subsection{is-sorted}
+
+Verifica se una lista è ordinata in ordine crescente.
+
+\begin{lstlisting}
+    is_sorted([]). %caso base 1: lista vuota 
+    is_sorted([_]). 
+    %caso base 2: lista con un solo elemento e' gia' ordinata
+    is_sorted([X, Y|Xs]):-
+        X=<Y,
+        is_sorted([Y|Xs]). 
+        %caso base 3: lista ordinata in ordine crescente
+\end{lstlisting}
+
+\subsection{invert}
+
+Inverte gli elementi presenti in una lista.
+
+\begin{lstlisting}
+    invert([],[]). %caso 1: lista vuota
+    invert([X|Xs], Rev):- %caso 2: inversione lista
+        invert(Xs, T),
+        append(T, [X], Rev).
+\end{lstlisting}
+
+\subsection{extremes}
+
+Si scriva un predicato che trovi gli estremi di una lista.
+
+\begin{lstlisting}
+    extremes([],_,_). %caso 1: lista vuota
+    extremes([X], X, X). %caso 2: un solo elemento
+    extremes([F|Xs], F, L):- 
+    %caso 3: verifica degli estremi
+        last(Xs,L). 
+        %predicato gia' esistente in Prolog last/2
+\end{lstlisting}
+
+\subsection{max}
+
+Predicato che calcoli il massimo numerico di una lista.
+
+\begin{lstlisting}
+    max([],_). %caso 1: lista vuota
+    max([X],X):- %caso 2: un solo elemento
+        number(X).
+    max([X|Xs], Y):- 
+    %caso 3: verifica il maggiore se il primo e' numerico
+        number(X), 
+        max(Xs,Y),
+        X>=Y.
+    max([_|Xs], Y):- 
+    %caso 4: verifica qual e' il maggiore se il primo non e' numerico
+        max(Xs,Y).
+\end{lstlisting}
+
+\subsection{is-monotonic}
+
+Si verifichi se una lista è monotona (crescente o decrescente).
+
+\begin{lstlisting}
+    is_monotonic([H|T]):-
+        is_decrescent([H|T]).
+    
+    is_monotonic([H|T]):-
+        is_crescent([H|T]).
+    
+    is_decrescent([]).
+    is_decrescent([_]).
+    is_decrescent([H,R|T]):-
+        H>=R,
+        is_decrescent([R|T]).
+    
+    is_crescent([]).
+    is_crescent([_]).
+    is_crescent([H,R|T]):-
+        H=<R,
+        is_crescent([R|T]).
+\end{lstlisting}
+
+\subsection{max}
+
+Si calcoli la somma di tutti i numeri presenti nella lista.
+
+\begin{lstlisting}
+    max([],0). %caso base: lista vuota
+    max([X],X):- 
+        number(X). 
+    	%caso 1: solo un elemento, dev'essere numerico
+    
+    max([H|T],S):- %caso ricorsivo, se numerico
+        number(H),
+        max(T,S1),
+        S is H+S1.
+    
+    max([_|T],S):- %caso ricorsivo, se !number(H)
+        max(T,S).
+\end{lstlisting}
+
+\subsection{almost-equal}
+
+Si scriva un predicato che prese due liste verifichi se hanno al più una differenza, esempio:
+
+\begin{lstlisting}
+    ?- almost_equal([a,b,c],[a,7,c]).
+    true
+
+    ?- almost_equal([a,b,c],[a,b,c]).
+    true
+
+    ?- almost_equal([a,b,c],[a,7,8]).
+    false
+\end{lstlisting}
+
+\begin{lstlisting}
+    almost_equal(L1, L2) :-
+        length(L1, A1),
+        length(L2, A2),
+        % Controlla che le liste abbiano la stessa lunghezza
+        A1 =:= A2,
+        % Conta le differenze tra le liste
+        count_difference(L1, L2, 0). 
+        
+    count_difference([], [], _). % Caso base: fine delle liste,
+                                 %accetta 0 o 1 differenze
+    count_difference([H1|T1],[H1|T2],C):-
+        count_difference(T1,T2,C). 
+        %teste uguali, si continua la ricorsione
+    
+    count_difference([H1|T1],[H2|T2],C):-
+        %teste diverse: si verifica che ci sia solo una differenza
+        H1\=H2,
+        C < 1,
+        NC is C+1,
+        count_difference(T1,T2,NC).
+\end{lstlisting}
+
+\subsection{value-length}
+
+Si scriva una funzione che calcoli la lunghezza di una lista.
+
+\begin{lstlisting}
+    value_length([], 0). %caso base: 0 elementi
+    value_length([_|END], A):- %caso 1: conta tutti gli
+    %elementi fino alla fine
+        value_length(END, A1),
+        A is A1 + 1.
+\end{lstlisting}
+
+\subsection{last-element}
+
+Si scriva un predicato che individui l'ultimo elemento di una lista.
+
+\begin{lstlisting}
+    last_element([X], X). %caso base: l'ultimo elemento corrisponde 
+    %all'ultimo elemento
+
+    last_element([_|T],X):- %caso 1: scorro la lista fino all'ultimo
+    					%elemento
+    last_element(T,X).
+\end{lstlisting}
+
+\subsection{is_member}
+
+Predicato che verifichi se un elemento è presente nella lista.
+
+\begin{lstlisting}
+    is_member([X],X). %caso 1: X e' l'elemento di [X]
+    is_member([X|_],X). %caso 2: X e' l'elemento in testa alla lista
+    is_member([_|T], X):- 
+    %caso 3: scorro la lista fin quando non trovo T=X
+    is_member(T,X).
+\end{lstlisting}
+
+\subsection{concatenate}
+
+Si scriva un predicato per concatenare 2 liste.
+
+\begin{lstlisting}
+    concatenate([],List,List). %caso base: lista vuota concat lista = lista
+    concatenate(L1, L2, Result):- %caso 1: si concatena
+    append(L1,L2,Result).
+\end{lstlisting}    
+
+\subsection{reverse-list}
+
+Si scriva un predicato che inverta una lista.
+
+\begin{lstlisting}
+    reverse_list([],[]). %caso -1: lista vuota gia' reversed
+    reverse_list([X], [X]). 
+    %caso base: 1 elemento = lista gia' reverse
+    reverse_list([X|Xs], R):- %caso ricorsivo: s'inverte la lista 
+        reverse_list(Xs,T),
+        append(T,[X],R).
+\end{lstlisting}
+
+
+
+\subsection{sum-list}
+
+Si scriva un predicato che faccia la somma di tutti gli elementi in una lista.
+
+\begin{lstlisting}
+    sum_list([],0). %caso base: 0 elementi valore = 0
+    sum_list([X],X). %caso 1: 1 elemento = l'elemento
+    sum_list([H|T], S):-
+        sum_list(T,S1),
+        S is S1 + H.
+\end{lstlisting}
+
+\subsection{max-list}
+
+Si scriva un predicato che trovi il massimo in una lista.
+
+\begin{lstlisting}
+max_list([H|T], Max) :-
+    max_list(T, H, Max). %max_list/3 mi serve per iniziare la ricorsione
+
+max_list([], Max, Max). %caso base: il massimo della lista e' stato trovato
+
+max_list([H|T],Max0,Max):-
+    H>Max0, %la testa e' maggiore del massimo visitato finora, ricorsione
+    max_list(T,H,Max).
+
+max_list([H|T],Max0,Max):-
+    H<Max0, 
+    max_list(T,Max0,Max). %si continua la ricorsione finche' non termina
+\end{lstlisting}
+
+\subsection{remove-element}
+
+Si scriva un predicato che rimuova un elemento da una lista.
+
+\begin{lstlisting}
+remove_element(_, [], []). %caso base: lista vuota, nulla da rimuovere
+remove_element(E, [H|T], [H|L]):- 
+    E \= H, 
+    %caso in cui E e' diverso da H, gia' e' presente nella lista L
+    remove_element(E, T, L).
+
+remove_element(E, [H|T], L):-
+    E == H, 
+    %caso in cui E e' uguale a H, non si aggiunge alla lista L
+    remove_element(E, T, L).
+\end{lstlisting}
+
+\subsection{split-list}
+
+Predicato che data una certa lunghezza divide la lista in 2 liste diverse (la lunghezza della lista di partenza parte sempre da 0).
+
+\begin{lstlisting}
+split_list(L, N, L1, L2) :- % Predicato principale
+    length(L, Len),
+    Len >= N, % Assicura che la lista abbia almeno N elementi
+    split_list_helper(L, N, 0, L1, L2). % Chiama l'helper con il contatore iniziale
+
+split_list_helper([], _, _, [], []). % Caso base: lista vuota
+
+split_list_helper([H|T], N, P, [H|L], R) :- % Caso 1: aggiungi a sinistra
+    P < N, % Controlla se il contatore e' minore di N
+    P1 is P + 1, % Incrementa il contatore
+    split_list_helper(T, N, P1, L, R).
+
+split_list_helper([H|T], N, P, L, [H|R]) :- % Caso 2: aggiungi a destra
+    P >= N, % Controlla se il contatore ha raggiunto N
+    split_list_helper(T, N, P, L, R).
+\end{lstlisting}
+
+\subsection{split-even-odd}
+
+Si scriva un predicato che divida una lista in due liste, rispettivamente, una di numeri pari e l'altra di numeri dispari.
+
+\begin{lstlisting}
+split_even_odd([],[],[]). %liste vuote, se la lista e' vuota
+split_even_odd([H|T], [H|E], O):- %divisione in lista pari
+    0 is mod(H,2),
+    split_even_odd(T, E, O).
+
+split_even_odd([H|T],E,[H|O]):- %divisione in lista dispari
+    1 is mod(H,2),
+    split_even_odd(T, E, O).
+\end{lstlisting}
+
+\subsection{is-palindrome}
+
+Predicato che verifichi se una lista è palindroma.
+
+\begin{lstlisting}
+is_palindrome([]).
+is_palindrome([_]).
+is_palindrome([H|T]):-
+    append(H1, [H], T),
+    is_palindrome(H1).
+\end{lstlisting}
+
+Questo predicato funziona per com'è definito il predicato append, come ogni predicato può essere vero o falso e se H1, [H] e T sono uguali tra loro, allora la lista di partenza è palindroma.
+
+\subsection{perm}
+
+Si scriva un predicato che calcoli tutte le permutazioni di una lista.
+
+\begin{lstlisting}
+%Ragionamento per le permutazioni in una lista
+
+%caso base: lista vuota -> lista vuota
+perm([],[]).
+
+%caso 1: riordino la lista per ricoprire tutte le forme che puo' avere la lista
+%-> probabilmente serve un helper/3
+perm([X|Y],Z):-
+    perm(Y,W),
+    helper(X,Z,W).
+
+%caso base helper/3: se la lista di partenza ha la stessa testa della lista
+%allora costruisco solo la lista della coda
+helper(X,[X|T],T). 
+
+%caso ricorsivo: costruisco la lista risultante
+helper(X,[F|R],[F|S]):-
+    helper(X,R,S).
+\end{lstlisting}
